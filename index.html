@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Sorting methods Bubble Sort and other explained visually">
+        
+        <link rel="stylesheet" type="text/css" href="vendors/css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="vendors/css/grid.css">
+<!--        <link rel="stylesheet" type="text/css" href="vendors/css/animate.css">-->
+        <link rel="stylesheet" type="text/css" href="resources/css/sorting.css">
+<!--        <link rel="stylesheet" type="text/css" href="resources/css/queries.css">-->
+        <script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>        
+        <link href="https://fonts.googleapis.com/css?family=Lato:100,300,300i,400" rel="stylesheet" type='text/css'>
+        <title>Visual sorting methods</title>        
+
+<!--
+        <link rel="apple-touch-icon" sizes="180x180" href="/resources/favicons/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/resources/favicons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/resources/favicons/favicon-16x16.png">
+        <link rel="manifest" href="/resources/favicons/site.webmanifest">
+        <link rel="mask-icon" href="/resources/favicons/safari-pinned-tab.svg" color="#5bbad5">
+        <link rel="shortcut icon" href="/resources/favicons/favicon.ico">
+-->
+
+        <meta name="msapplication-TileColor" content="#da532c">
+        <meta name="msapplication-config" content="/resources/favicons/browserconfig.xml">
+        <meta name="theme-color" content="#ffffff">        
+    </head>
+    <body>
+        <header>
+            <div class="hero-txt-box">
+                <h1>Sorting made visual</h1>
+            </div>
+            
+        </header>
+        <section class="section-features" id="features">
+            <div class="row">
+                <p class="subtitle">
+                This is a visual sort method procedure. On the left are the sort methods currently available, and below are the options you can test for each method.
+                Once you start the sorting, you will visually see which elements are being moved and in what order. There are counter and values displayed for your convenience.
+                </p>
+            </div>
+            <div class="row">
+                <div class="col span-1-of-7">
+                    <h3>Sort methods</h3>
+                    <ul>
+                        <li><a href="#" onclick="change_sort_method(1);">Bubble Sort </a></li>
+                        <li><a href="#" onclick="change_sort_method(2);">Insertion Sort </a></li>
+                        <li><a href="#" onclick="change_sort_method(3);">Merge Sort </a></li>
+                        <li><a href="#" onclick="change_sort_method(4);">Long Sort </a></li>
+                    </ul>
+                </div>
+                <div class="col span-6-of-7 sorting-area">
+                    <div class="row">
+                        <h3 id="sort-method-title">Bubble Sort</h3>
+                        <div class="col span-2-of-10">
+                            <div class="row">
+                                <span class="slider">
+                                    <p class="slider-title">List size</p>
+                                    <input id="listsize" type="range" min="2" max="20" name="listsize" value="3" oninput="list_size_changed(this.value);">
+                                    <p class="slider-size">(<span id="currentSlidevalue">3</span>)</p>
+                                </span>
+                            </div>
+                            <fieldset>
+                                <legend>Case</legend>
+                                <div class="row">
+                                    <input type="radio" id="1" name="testcase" onclick="sort_type_changed(this)" value="1" checked/>
+                                    <label class="sortcase" for="testcase">Random</label>
+                                </div>
+                                <div class="row">
+                                    <input type="radio" id="2" name="testcase" onclick="sort_type_changed(this)" value="2" />
+                                    <label class="sortcase" for="testcase">Decremental</label>
+                                </div>
+                                <div class="row">
+                                    <input type="radio" id="3" name="testcase" onclick="sort_type_changed(this)" value="3" />
+                                    <label class="sortcase" for="testcase">Incremental</label>
+                                </div>
+                            </fieldset>
+                            <div class="row ">
+                                <a href="#" class="btn" onclick='start_sort();'>SORT !</a>
+                            </div>
+                            
+                        </div>
+                        <div class="col span-7-of-10">
+                            <div class="original">
+                                <div class="original-header">Original list of items</div>
+                                <svg id="orig-state">
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col span-2-of-10">
+                            <p>How many time do we need to compare the values to get the whole list sorted?</p><br>
+                            <p class="slider-title">Steps : </p>
+                            <div class="row" id="step-counter">99</div>
+                            <div class="color-codes">
+                                <div>Ready to advance</div><div class="code-gray"></div>
+                                <div>Values are ok</div><div class="code-green"></div>
+                                <div>Swap values</div><div class="code-red"></div>
+                                <div>Value in final position</div><div class="code-fillgray"></div>
+                            </div>
+                        </div>
+                        <div class="col span-7-of-10">
+                            <div class="process">
+                                <div class="process-text">List of item in sort process</div>
+                                <svg id="moving-state">
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer>
+            <div class="row" style="text-align: center">
+                    <ul class="footer-nav">
+                        <li><a href="https://codepen.io/eday69/">Codepen</a></li>
+                        <li><a href="https://www.linkedin.com/in/ericchdayd/">Linkedin </a></li>
+                        <li><a href="https://github.com/eday69">GitHub</a></li>
+                        <li><a href="https://medium.com/@eric.ch.day">Medium</a></li>
+                    </ul>
+            </div>
+            <div class="row">
+                <p>
+                    Copyright &copy; 2018 by Eric Day. All rights reserved.
+                </p>
+            </div>
+        </footer>
+<!--
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/respond@0.9.0/main.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/selectivizr@1.0.3/selectivizr.min.js"></script>
+-->
+        <script src="https://d3js.org/d3.v5.js"></script>
+        <script src="resources/js/sort_algorithm.js"></script>
+    </body>
+
+</html>
+    
