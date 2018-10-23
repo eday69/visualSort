@@ -67,6 +67,9 @@ function change_sort_method(sortmethod) {
       case 3: 
           text="Merge Sort";
           break;
+      case 4: 
+          text="Quick Sort";
+          break;
   }
 
   sort_title.innerHTML = text;
@@ -195,17 +198,11 @@ function drawWorkBlocks(worklist) {
 
 function drawMergeBlocks(list, posx, posy) {
 //    svgpc.selectAll("*").remove();
-//    var bar_height = Math.round(svg_height / max_item) - 1;
-//    var bar_height_process = Math.round((svgpc_height-padding_bottom) / max_item)-1;
-//    width = Math.round((svg_width / list.length) - padding_left)-1;
-//    if (width > 50) width=30;
 
     var size = 30;
     var x = posx - (list.length*size);
     var counter=0;
     for (let value of list) {
-        // Boxes in scaled size (configurable), that will visually move to
-        // represent the sorting step by step
         var x_text = 0;
         if (value > 9) {
            x_text = x + (size*counter+(size/2))-5- padding_left; }
@@ -542,17 +539,65 @@ let call_merge_sort = async function(ms_list) {
     paintblocks(worklist, 1, "#eaffe3");
 }
 
+let quick_sort = async function(ms_list, shiftX, shiftY) {
+//function quick_sort(ms_list, shiftX, shiftY) {    
+    var less = [], 
+        pivotlist = [],
+        more = [];
+    if (ms_list.length <= 1) {
+        ++total_steps;
+        updateSteps(total_steps);
+        return ms_list;
+    }
+    else {
+        pivot = ms_list[0];
+        for (let value of ms_list) {
+            ++total_steps;
+            updateSteps(total_steps);
+            if (value < pivot) {
+                less.push(value);
+            }
+            else if (value > pivot) {
+                more.push(value);
+            }
+            else {
+                pivotlist.push(value);
+            }
+        }
+        dx_left =   (shiftX*less.length/2);
+        dx_right = dx_left;
+
+        await sleep(1800);
+        
+        await moveMergeBlocks(less, -dx_left, -shiftY);
+        await moveMergeBlocks(more, dx_right, -shiftY);
+
+        less = await quick_sort(less, shiftX, shiftY);
+        more = await quick_sort(more, shiftX, shiftY);
+        
+        console.log(less, pivotlist, more);
+        return less.concat(pivotlist).concat(more);
+    }
+}
+
+let call_quick_sort = async function(ms_list) {
+//function call_quick_sort(ms_list) {
+    var shiftX=10, shiftY=40;
+    worklist= await quick_sort(ms_list, shiftX, shiftY);
+    console.log('After', worklist);
+//    paintblocks(worklist, 1, "#eaffe3");    
+}
 
 function start_sort() {
     drawOriginalBlocks(worklist);
-//    console.log('Started with: ',worklist);
+    console.log('Started with: ',worklist);
 //    console.log('Produced: ', merge_sort(worklist));
 //    worklist = [5, 6, 3, 4, 8, 11];
     drawOriginalBlocks(worklist);
     var sort_title = document.getElementById("sort-method-title").innerHTML;
     switch (sort_title) {
         case "Bubble Sort":
-        drawWorkBlocks(worklist);
+            drawWorkBlocks(worklist);
             bubble_sort();
             break;
         case "Insertion Sort":
@@ -565,6 +610,11 @@ function start_sort() {
             drawMergeBlocks(worklist, x, 50);
             call_merge_sort(worklist);
 //            worklist=merge_sort(worklist, shiftX, shiftY);
+            break;
+        case "Quick Sort":
+            x = 350 + worklist.length*30/2;
+            drawMergeBlocks(worklist, x, 50);
+            call_quick_sort(worklist);
             break;
     }
     console.log('After', worklist);
