@@ -21,9 +21,6 @@ var svgpc = d3.select("#moving-state");
 
 
 var 
-//svg_width = 700,
-//    svg_height = 150,
-//    svgpc_height = 250,
     width = 30,
     padding_bottom = 30,
     padding_left = 5,
@@ -33,9 +30,16 @@ function generate_list(size, sorttype) {
     function compareNumbers(a, b) {
         return a - b;
     }
-    var list = [];
     
-    list = Array.from({length: size}, () => Math.floor(Math.random() * (size*2)));
+    var list = [];
+    size = parseInt(size);
+    while(list.length < size){
+        var randomnumber = Math.floor(Math.random()*(size+1)) + 1;
+        if(list.indexOf(randomnumber) > -1) continue;
+        list[list.length] = randomnumber;
+    }
+    
+//    list = Array.from({length: size}, () => Math.floor(Math.random() * (size*2)));
     if (sorttype == 2) {
         list.sort(function(b, a) {
             return a - b;
@@ -63,10 +67,6 @@ function change_sort_method(sortmethod) {
       case 3: 
           text="Merge Sort";
           break;
-      case 4: 
-          text="Other Sort";
-          break;
-          
   }
 
   sort_title.innerHTML = text;
@@ -140,11 +140,10 @@ function drawOriginalBlocks(worklist) {
 
 function getXtext(value, counter) {
      if (value > 9) {
-         console.log((width*counter+(width)/2+padding_left*(counter))-5);
         return (width*counter+(width)/2+padding_left*(counter))-5; 
      }
      else {
-        return width*counter+(width)/2+padding_left*(counter);
+        return width*counter+(width)/2+padding_left*(counter)-(5-padding_left);
      }
 }
 
@@ -211,7 +210,7 @@ function drawMergeBlocks(list, posx, posy) {
         if (value > 9) {
            x_text = x + (size*counter+(size/2))-5- padding_left; }
         else {
-           x_text = x + size*counter+(size)/2 - padding_left; }
+           x_text = x + size*counter+(size)/2 - padding_left-(5-padding_left); }
 
         svgpc.append("rect")
             .attr("id", "block_"+value)
@@ -304,16 +303,21 @@ let bubble_sort = async function() {
         d3.select("#block_"+(i)).style("fill","lightgray");
     }
     d3.select("#block_"+(0)).style("fill","lightgray");
+    d3.select("#bubble").remove();
+//    await sleep(500);
+    await paintblocks_idx(worklist, 1, "#eaffe3");
 }
 
 let insertion_sort = async function() {
     // we skip first element, asume it the starting point of sort
     d3.select("#block_0").style("fill", "lightgray");
     for (j = 1; j < worklist.length; j++) {
-        console.log("j: ",j);
+//        console.log("j: ",j);
         d3.select("#bubble").attr("x", (width+padding_left)*(j-1) + padding_left - 2);
         var value = worklist[j];
         i = j-1;
+        ++total_steps;
+        updateSteps(total_steps);
         while ((i > -1) && (worklist[i] > value)) {
             d3.select("#bubble").attr("x", (width+padding_left)*(i) + padding_left - 2);
             d3.select("#bubble").style("stroke","red");
@@ -329,95 +333,104 @@ let insertion_sort = async function() {
             .transition().duration(1200)
             .style("stroke","#b5b5b5");
         worklist[i+1] = value;
-        console.log("j: ",j, worklist);
+//        console.log("j: ",j, worklist);
         d3.select("#block_"+(i+1)).style("fill", "lightgray");
         console.log("Changed j: ",j)
     }
+    d3.select("#bubble").remove();
+//    await sleep(500);
+    await paintblocks_idx(worklist, 1, "#eaffe3");
 }
 
+function paintblocks_idx(list, flag, color) {
+    var idx=0;
+    for (let block of list) {
+        var thisblock = d3.select("#block_"+idx);
+        if (flag) {
+            thisblock.style("stroke", "black")
+                     .style("fill", color);
+        }
+        else {
+            thisblock.style("stroke", "black")
+                     .style("fill", "none");
+        }
+        idx +=1;
+    }
+}
+
+
 //function merge(left, right) {
-let merge = async function(left, right) {
+let merge = async function(left, right, shiftX, shiftY) {
     result = [];
-    console.log('Doing ', left, right);
+    shiftX *= 2;
+    
+    // Remove fill from list
+    paintblocks(left, 0, "none");
+    paintblocks(right, 0, "none");
+
+    // More color?
+    
+//    console.log('Doing ', left, right);
     var l_idx=0, r_idx=0;
 //    var leftpos = parseInt(d3.select("#block_"+left[0]).attr("x"));
     var posy = parseInt(d3.select("#block_"+left[0]).attr("y"));
+    var posx = parseInt(d3.select("#block_"+left[0]).attr("x"));
     var offText=18;
-    var offY=40;
     while ((l_idx < left.length) && (r_idx < right.length)) {
-
+        ++total_steps;
+        updateSteps(total_steps);
         var left_value = left[l_idx];
         var right_value = right[r_idx];
 
         var leftblock = d3.select("#block_"+left_value);
+        var leftpos=parseInt(leftblock.attr("x"));
+
         var rightblock = d3.select("#block_"+right_value);
+        var rightpos=parseInt(rightblock.attr("x"));
+
         var leftblocktxt = d3.select("#btext_"+left_value);
         var rightblocktxt = d3.select("#btext_"+right_value);
-        var leftpos=parseInt(leftblock.attr("x"));
-        var rightpos=parseInt(rightblock.attr("x"));
-        console.log('l_val',left_value, 'r_val', right_value, result, posy);
-//        console.log('lf.x: '+leftblock.attr("x"), "rt.x: "+rightblock.attr("x"));
-
-        //        leftblock.style("stroke", "red");
-//        rightblock.style("stroke", "red");
+//        console.log('l_val',left_value, 'r_val', right_value, result, posy, posx);
         if (left_value <= right_value) {
-//            var leftpos=parseInt(leftblock.attr("x"));
             if (right_value > 9) {
-               x_text = leftpos + (30/2) - 5 - padding_left; }
+               x_text = posx + (shiftX/2) - 5 - padding_left; }
             else {
-               x_text = leftpos + (30/2) - padding_left; }
+               x_text = posx + (shiftX/2) - padding_left-(5-padding_left); }
             
-            console.log("lf < rt :", left_value, right_value, leftpos);
+//            console.log("lf < rt :", left_value, right_value, leftpos);
+            
+            leftblock.transition().duration(500)
+                .attr("x", posx)
+                .attr("y", posy-shiftY);
+            leftblocktxt.transition().duration(500)
+                .attr("x", x_text)
+                .attr("y", posy-offText);
+            await sleep(800);
+            
             result.push(left_value);
-            
-            rightblock.transition().duration(600)
-                .attr("x", leftpos+30).attr("y", posy-offY);
-            rightblocktxt.transition().duration(600)
-                .attr("x", x_text+30).attr("y", posy-offText);
-            
             ++l_idx;
         }
         else {
-//            var leftpos=parseInt(leftblock.attr("x"));
             if (left_value > 9) {
-               x_text = leftpos + (30/2) - 5 - padding_left; }
+               x_text = posx + (shiftX/2) - 5 - padding_left; }
             else {
-               x_text = leftpos + (30/2) - padding_left; }
+               x_text = posx + (shiftX/2) - padding_left-(5-padding_left); }
             
-            console.log("rt < lf :", left_value, right_value, leftpos);
-//    d3.select("#block_"+i)
-//        .attr("id","block_tmp")
-//        .transition().duration(400)
-//        .attr("transform", "translate(0, -15)")
-//        .transition().duration(400)
-//        .attr("x", width*(j)+padding_left*(j+1))
-//        .transition().duration(400)
-//        .attr("transform", "translate(0, 0)");
+//            console.log("rt < lf :", left_value, right_value, leftpos);
 
-            rightblock
-                .attr("x", leftpos)
-                .attr("y", posy-offY);
-//                .attr("transform", "translate("+(leftpos-rightpos)+", -"+offY+")")
+            rightblock.transition().duration(500)
+                .attr("x", posx)
+                .attr("y", posy-shiftY);
             
             rightblocktxt.transition().duration(500)
-                .attr("x", leftblocktxt.attr("x"))
+                .attr("x", x_text)
                 .attr("y", posy-offText);
-        await sleep(800);
+            await sleep(800);
 
-            leftblock
-//                .transition().duration(600)
-//                .attr("transform", "translate("+(30)+", -"+offY+")")
-                .attr("x", leftpos+30)
-                .attr("y", posy-offY);
-            
-            leftblocktxt.transition().duration(500)
-                .attr("x", x_text+30)
-                .attr("y", posy-offText);
-            
-        await sleep(800);
             result.push(right_value);
             ++r_idx;
         }
+        posx+=30;
         leftblock.transition().duration(400)
             .style("stroke", "black");
         rightblock.transition().duration(400)
@@ -426,45 +439,46 @@ let merge = async function(left, right) {
     }
     if (left) {
         var listtoconcat=left.slice(l_idx);
-        console.log("Left: ", left, result, l_idx, listtoconcat);
+//        console.log("Left: ", left, result, l_idx, listtoconcat);
         if (listtoconcat.length > 0) {
-            var leftblock= parseInt(d3.select("#block_"+result[result.length-1]).attr("x"));
-            var rightblock= parseInt(d3.select("#block_"+listtoconcat[0]).attr("x"));
-            moveMergeBlocks(listtoconcat, -(leftblock-rightblock), offY);
+            ++total_steps;
+            updateSteps(total_steps);
+            var leftblock= parseInt(d3.select("#block_"+listtoconcat[0]).attr("x"));
+            moveMergeBlocks(listtoconcat, (posx-leftblock), shiftY);
         }
         result = result.concat(listtoconcat);
     }
     if (right) {
         var listtoconcat=right.slice(r_idx);
-        console.log("Right: ", right, result, r_idx, listtoconcat);
+//        console.log("Right: ", right, result, r_idx, listtoconcat);
         if (listtoconcat.length > 0) {
-            var leftblock= parseInt(d3.select("#block_"+result[result.length-1]).attr("x"));
+            ++total_steps;
+            updateSteps(total_steps);
             var rightblock= parseInt(d3.select("#block_"+listtoconcat[0]).attr("x"));
-            moveMergeBlocks(listtoconcat, (leftblock-rightblock), offY);
+            moveMergeBlocks(listtoconcat, (posx-rightblock), shiftY);
         }
         result = result.concat(listtoconcat);
     }
-    console.log("Result, so far: ",result);
-        await sleep(800);
+    // add fill to list
+    paintblocks(result, 1, "lightgray");
+    await sleep(800);
     return result;
 }
+
 
 function moveMergeBlocks(list, amounttoshift, posy) {
     var size = 30;
 //    console.log('Moving: ', list, amounttoshift);
     for (let block of list) {
         var thisblock = d3.select("#block_"+block);
-        console.log('thisblock', thisblock);
 
         new_x = parseInt(thisblock.attr("x")) + amounttoshift;
         new_y = parseInt(thisblock.attr("y")) - posy;
-
-//        console.log("Block x: ", thisblock.attr("x"), new_x);
         var x_text = 0;
         if (block > 9) {
            x_text = new_x + (size/2) - 5 - padding_left; }
         else {
-           x_text = new_x + (size)/2 - padding_left; }
+           x_text = new_x + (size)/2 - padding_left-(5-padding_left); }
 
         thisblock.transition().duration(600)
             .attr("x", new_x)
@@ -477,12 +491,27 @@ function moveMergeBlocks(list, amounttoshift, posy) {
     }
 }
 
-let merge_sort = async function(ms_list, size) {
-//function merge_sort(ms_list, size) {
-    console.log('Staring list : ', ms_list);
+function paintblocks(list, flag, color) {
+    for (let block of list) {
+        var thisblock = d3.select("#block_"+block);
+        if (flag) {
+            thisblock.style("stroke", "black")
+                     .style("fill", color);
+        }
+        else {
+            thisblock.style("stroke", "black")
+                     .style("fill", "none");
+        }
+    }
+}
+
+let merge_sort = async function(ms_list, shiftX, shiftY) {
+
+//    console.log('Staring list : ', ms_list);
     if (ms_list.length <= 1) {
-        d3.select("#block_"+ms_list[0]).transition().duration(400)
-            .style("stroke", "green");
+//        d3.select("#block_"+ms_list[0]).transition().duration(400)
+//            .style("stroke", "green");
+        paintblocks(ms_list, 1, "lightgray");
         return ms_list;
     }
     var middle = Math.floor(ms_list.length / 2);
@@ -490,42 +519,35 @@ let merge_sort = async function(ms_list, size) {
     var left = ms_list.slice(0, middle);
     var right = ms_list.slice(middle);
     
-    dx_left =  left.length*size + (size*left.length/2);
-    dx_right = dx_left + right.length*size;
+//    dx_left =  (left.length*shiftX) + (shiftX*left.length/2);
+//    dx_right = dx_left + (right.length*shiftX);
+    dx_left =   (shiftX*left.length/2);
+    dx_right = dx_left;
+    ++total_steps;
+    updateSteps(total_steps);
     
-//    moveMergeBlocks(left, (posx-left.length*30-45), posy+40);
-//    moveMergeBlocks(right, posx+45, posy+40);
-    moveMergeBlocks(left, -dx_left, -40);
-    moveMergeBlocks(right, dx_right, -40);
+    await moveMergeBlocks(left, -dx_left, -shiftY);
+    await moveMergeBlocks(right, dx_right, -shiftY);
 
     await sleep(800);
-//    dx -= 20;
-//    middle = Math.floor(left.length / 2);
-//    left = left.slice(0, middle);
-//    console.log(left, dx);
-//    moveMergeBlocks(left, -dx, posy+40);
-
         
-    left = await merge_sort(left, size);
-    right = await merge_sort(right, size);
-//    await sleep(2600);
-    return await merge(left, right)
+    left = await merge_sort(left, shiftX, shiftY);
+    right = await merge_sort(right, shiftX, shiftY);
+    return await merge(left, right, shiftX, shiftY)
 }
 
-function createMergeArray(worklist) {
-    let newMergeArray=[];
-    worklist.forEach((value, index, self) => {
-        newMergeArray.push([index, value]);
-    }) 
-    console.log(newMergeArray);
-    return newMergeArray;
+let call_merge_sort = async function(ms_list) {
+    var shiftX=10, shiftY=40;
+    worklist=await merge_sort(ms_list, shiftX, shiftY);
+    paintblocks(worklist, 1, "#eaffe3");
 }
+
 
 function start_sort() {
     drawOriginalBlocks(worklist);
-    console.log('Started with: ',worklist);
+//    console.log('Started with: ',worklist);
 //    console.log('Produced: ', merge_sort(worklist));
-    worklist = [5, 6, 3, 4, 8, 11];
+//    worklist = [5, 6, 3, 4, 8, 11];
     drawOriginalBlocks(worklist);
     var sort_title = document.getElementById("sort-method-title").innerHTML;
     switch (sort_title) {
@@ -541,8 +563,8 @@ function start_sort() {
             x = 350 + worklist.length*30/2;
 //            var newworklist = createMergeArray(worklist);
             drawMergeBlocks(worklist, x, 50);
-            var size=15;
-            worklist=merge_sort(worklist, size);
+            call_merge_sort(worklist);
+//            worklist=merge_sort(worklist, shiftX, shiftY);
             break;
     }
     console.log('After', worklist);
