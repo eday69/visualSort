@@ -546,7 +546,8 @@ let visual_qs_join_lists = async function(less, pivotlist, more, shiftX, shiftY)
     posy=parseInt(pivotblock.attr("y"));
     var counter=0;
     for (let value of less.reverse()) {
-        var new_x=posx-(less.length)*30-counter*30;
+//        var new_x=posx-(less.length)*30-counter*30;
+        var new_x=posx-(counter+1)*30;
         var curr_block = d3.select("#block_"+value);
         curr_block.transition().duration(600)
                   .attr("x", new_x)
@@ -580,12 +581,6 @@ let visual_qs_join_lists = async function(less, pivotlist, more, shiftX, shiftY)
             .attr("y", posy+22);
         counter +=1;        
     }
-//    with pivotlist Y pos, iterate from right to left the items of less and 
-//      move them to the left of pivotlist
-// ditto on the more list, just add them to the right of pivot list    
-//    await moveMergeBlocks(less, shiftX, shiftY);
-//    await moveMergeBlocks(pivotlist, shiftX, shiftY);
-//    await moveMergeBlocks(more, shiftX, shiftY);
 }
 
 let quick_sort = async function(ms_list, shiftX, shiftY) {
@@ -612,14 +607,14 @@ let quick_sort = async function(ms_list, shiftX, shiftY) {
                 newposx=posx-(ms_list.length - 1)*30+less.length*30;
                 console.log(posx, newposx, ms_list.length, less.length)
                 await moveMergeBlocks([value], newposx-oldposx, -shiftY);
-        await sleep(800);
+                await sleep(800);
                 
                 less.push(value);
             }
             else if (value > pivot) {
                 newposx=posx+(more.length + 1)*30;
                 await moveMergeBlocks([value], newposx-oldposx, -shiftY);
-        await sleep(800);
+                await sleep(800);
 
                 more.push(value);
             }
@@ -640,7 +635,7 @@ let quick_sort = async function(ms_list, shiftX, shiftY) {
         
         console.log(less, pivotlist, more);
         // process to join list going up....
-        await sleep(800);
+        await sleep(1800);
         await visual_qs_join_lists(less, pivotlist, more, shiftX, shiftY);
         return less.concat(pivotlist).concat(more);
     }

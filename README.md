@@ -1,9 +1,11 @@
 # Sort-Methods-Visually
 
 Implemented the following sort methods in a visual environment:
-    Bubble Sort
-    Insertion Sort
-    Merge Sort
+    -Bubble Sort
+    -Insertion Sort
+    -Merge Sort
+    -Quick Sort (in process)
+    
 This way you can 'see' the way the computer is working through the items.
 Its easier to see on the screen, step by step, how the method sort a list of items.
 
