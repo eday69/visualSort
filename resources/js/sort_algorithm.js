@@ -539,6 +539,55 @@ let call_merge_sort = async function(ms_list) {
     paintblocks(worklist, 1, "#eaffe3");
 }
 
+let visual_qs_join_lists = async function(less, pivotlist, more, shiftX, shiftY) {
+    var size = 30;
+    var pivotblock = d3.select("#block_"+pivotlist[0]);
+    posx=parseInt(pivotblock.attr("x"));
+    posy=parseInt(pivotblock.attr("y"));
+    var counter=0;
+    for (let value of less.reverse()) {
+        var new_x=posx-(less.length)*30-counter*30;
+        var curr_block = d3.select("#block_"+value);
+        curr_block.transition().duration(600)
+                  .attr("x", new_x)
+                  .attr("y", posy);
+        var x_text = 0;
+        if (value > 9) {
+           x_text = new_x + (size/2) - 5 - padding_left; }
+        else {
+           x_text = new_x + (size)/2 - padding_left-(5-padding_left); }
+        d3.select("#btext_"+value)
+            .transition().duration(600)
+            .attr("x", x_text)
+            .attr("y", posy+22);
+        counter +=1;
+    }
+    var counter=0;
+    for (let value of more) {
+        var new_x=posx+(counter+1)*30;
+        var curr_block = d3.select("#block_"+value);
+        curr_block.transition().duration(600)
+                  .attr("x", new_x)
+                  .attr("y", posy);
+        var x_text = 0;
+        if (value > 9) {
+           x_text = new_x + (size/2) - 5 - padding_left; }
+        else {
+           x_text = new_x + (size)/2 - padding_left-(5-padding_left); }
+        d3.select("#btext_"+value)
+            .transition().duration(600)
+            .attr("x", x_text)
+            .attr("y", posy+22);
+        counter +=1;        
+    }
+//    with pivotlist Y pos, iterate from right to left the items of less and 
+//      move them to the left of pivotlist
+// ditto on the more list, just add them to the right of pivot list    
+//    await moveMergeBlocks(less, shiftX, shiftY);
+//    await moveMergeBlocks(pivotlist, shiftX, shiftY);
+//    await moveMergeBlocks(more, shiftX, shiftY);
+}
+
 let quick_sort = async function(ms_list, shiftX, shiftY) {
 //function quick_sort(ms_list, shiftX, shiftY) {    
     var less = [], 
@@ -550,14 +599,28 @@ let quick_sort = async function(ms_list, shiftX, shiftY) {
         return ms_list;
     }
     else {
-        pivot = ms_list[0];
+        pivot = ms_list[Math.floor(ms_list.length/2)];
+        var pivotblock = d3.select("#block_"+pivot);
+        pivotblock.style("fill", "#b5b5b5")
+        posx=parseInt(pivotblock.attr("x"));
         for (let value of ms_list) {
             ++total_steps;
             updateSteps(total_steps);
+            var curr_block = d3.select("#block_"+value);
+            oldposx=curr_block.attr("x");
             if (value < pivot) {
+                newposx=posx-(ms_list.length - 1)*30+less.length*30;
+                console.log(posx, newposx, ms_list.length, less.length)
+                await moveMergeBlocks([value], newposx-oldposx, -shiftY);
+        await sleep(800);
+                
                 less.push(value);
             }
             else if (value > pivot) {
+                newposx=posx+(more.length + 1)*30;
+                await moveMergeBlocks([value], newposx-oldposx, -shiftY);
+        await sleep(800);
+
                 more.push(value);
             }
             else {
@@ -567,15 +630,18 @@ let quick_sort = async function(ms_list, shiftX, shiftY) {
         dx_left =   (shiftX*less.length/2);
         dx_right = dx_left;
 
-        await sleep(1800);
         
-        await moveMergeBlocks(less, -dx_left, -shiftY);
-        await moveMergeBlocks(more, dx_right, -shiftY);
+//        await moveMergeBlocks(less, -dx_left, -shiftY);
+//        await moveMergeBlocks(more, dx_right, -shiftY);
 
+        pivotblock.style("fill", "#fff")
         less = await quick_sort(less, shiftX, shiftY);
         more = await quick_sort(more, shiftX, shiftY);
         
         console.log(less, pivotlist, more);
+        // process to join list going up....
+        await sleep(800);
+        await visual_qs_join_lists(less, pivotlist, more, shiftX, shiftY);
         return less.concat(pivotlist).concat(more);
     }
 }
@@ -585,7 +651,7 @@ let call_quick_sort = async function(ms_list) {
     var shiftX=10, shiftY=40;
     worklist= await quick_sort(ms_list, shiftX, shiftY);
     console.log('After', worklist);
-//    paintblocks(worklist, 1, "#eaffe3");    
+    paintblocks(worklist, 1, "#eaffe3");    
 }
 
 function start_sort() {
