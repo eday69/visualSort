@@ -545,9 +545,9 @@ let visual_qs_join_lists = async function(less, pivotlist, more, shiftX, shiftY)
     posx=parseInt(pivotblock.attr("x"));
     posy=parseInt(pivotblock.attr("y"));
     var counter=0;
-    for (let value of less.reverse()) {
+    for (let value of less) {
 //        var new_x=posx-(less.length)*30-counter*30;
-        var new_x=posx-(counter+1)*30;
+        var new_x=posx-(less.length-counter)*30;
         var curr_block = d3.select("#block_"+value);
         curr_block.transition().duration(600)
                   .attr("x", new_x)
@@ -635,9 +635,10 @@ let quick_sort = async function(ms_list, shiftX, shiftY) {
         
         console.log(less, pivotlist, more);
         // process to join list going up....
-        await sleep(1800);
+        await sleep(800);
         await visual_qs_join_lists(less, pivotlist, more, shiftX, shiftY);
-        return less.concat(pivotlist).concat(more);
+        var newlist = less.concat(pivotlist);
+        return newlist.concat(more);
     }
 }
 
@@ -645,7 +646,7 @@ let call_quick_sort = async function(ms_list) {
 //function call_quick_sort(ms_list) {
     var shiftX=10, shiftY=40;
     worklist= await quick_sort(ms_list, shiftX, shiftY);
-    console.log('After', worklist);
+    console.log('Done: ', worklist);
     paintblocks(worklist, 1, "#eaffe3");    
 }
 
